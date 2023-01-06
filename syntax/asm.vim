@@ -4,7 +4,7 @@
 " Original Author:      Manuel M.H. Stol        <Manuel.Stol@allieddata.nl>
 " Former Maintainer:    Manuel M.H. Stol        <Manuel.Stol@allieddata.nl>
 " Contributors: Leonard König <leonard.r.koenig@gmail.com> (C string highlighting)
-" Last Change:  2017 Jan 23
+" Last Change:  2023 Jan 6
 " NASM Home:    http://www.nasm.us/
 
 
@@ -246,6 +246,7 @@ syn match   nasmSpcRegister     "\<E\=IP\>"
 syn match   nasmFpuRegister     "\<ST\o\>"
 syn match   nasmMmxRegister     "\<MM\o\>"
 syn match   nasmSseRegister     "\<XMM\o\>"
+syn match   nasmAvxRegister     "\<YMM\o\>"
 syn match   nasmCtrlRegister    "\<CR\o\>"
 syn match   nasmDebugRegister   "\<DR\o\>"
 syn match   nasmTestRegister    "\<TR\o\>"
@@ -391,18 +392,54 @@ syn keyword nasmMmxInstruction  PMINSW PMINUB PMOVMSKB PMULHUW PSADBW PSHUFW
 
 
 " Streaming SIMD Extension Packed Instructions: (requires SSE unit)
-syn match   nasmInstructnError  "\<CMP\a\{1,5}[PS]S\>"
-syn match   nasmSseInstruction  "\<CMP\(N\=\(EQ\|L[ET]\)\|\(UN\)\=ORD\)\=[PS]S\>"
-syn keyword nasmSseInstruction  ADDPS ADDSS ANDNPS ANDPS
-syn keyword nasmSseInstruction  COMISS CVTPI2PS CVTPS2PI
+" SSE1+2
+syn match   nasmInstructnError  "\<CMP\A\{1,5}[PS][SD]\>"
+syn match   nasmSseInstruction  "\<CMP\(N\=\(EQ\|L[ET]\)\|\(UN\)\=ORD\)\=[PS][SD]\>"
+" ROUND is SSE4
+syn match   nasmSseInstruction  "\%(ADD\|SUB\|MUL\|DIV\|SQRT\|MAX\|MIN\|ROUND\|\)[PS][SD]"
+syn keyword nasmSseInstruction  RSQRTPS RSQRTSS
+syn match   nasmSseInstruction  "\<\%(ANDN\?\|X\?OR\|CMP\)[PS][SD]\>"
+syn match   nasmSseInstruction  "\<\%(SHUF\|UNPCK[HL]\)P[SD]\>"
+syn match   nasmSseInstruction  "\<\%(U\?COM\)S[SD]\>"
+syn match   nasmSseInstruction  "\<CVTT\?\([PS]\)[SD]2\1I\>"
+syn match   nasmSseInstruction  "\<CVT\([PS]\)I2\1[SD]\>"
+syn match   nasmSseInstruction  "\<CVTT\?P[SD]2DQ\>"
+syn keyword nasmSseInstruction  CVTDQ2PD CVTDQ2PS CVTPS2PD CVTSS2SD CVTPD2PS CVTSD2SS
+syn match   nasmSseInstruction  "\<MOV\%([AHLU]\|MSK\|NT\)P[SD]\>"
+syn keyword nasmSseInstruction  MOVSS MOVSD MOVHLPS MOVLHPS
+syn keyword nasmSseInstruction  MOVDQA MOVDQU MOVQ2DQ MOVDQ2Q MOVNTDQ MOVNTI
+syn keyword nasmSseInstruction  PADDQ PSUBQ SHUFLW PSHUFHW PSHUFD 
+syn keyword nasmSseInstruction  PSLLDQ PSRLDQ PUNPCKHQDQ PUNPCKLQDQ
+syn keyword nasmSseInstruction  CLFLUSH PAUSE
+syn keyword nasmSseInstruction  MASKMOVDQU
+
 syn keyword nasmSseInstruction  CVTSI2SS CVTSS2SI CVTTPS2PI CVTTSS2SI
-syn keyword nasmSseInstruction  DIVPS DIVSS FXRSTOR FXSAVE LDMXCSR
-syn keyword nasmSseInstruction  MAXPS MAXSS MINPS MINSS MOVAPS MOVHLPS MOVHPS
-syn keyword nasmSseInstruction  MOVLHPS MOVLPS MOVMSKPS MOVNTPS MOVSS MOVUPS
-syn keyword nasmSseInstruction  MULPS MULSS
-syn keyword nasmSseInstruction  ORPS RCPPS RCPSS RSQRTPS RSQRTSS
-syn keyword nasmSseInstruction  SHUFPS SQRTPS SQRTSS STMXCSR SUBPS SUBSS
-syn keyword nasmSseInstruction  UCOMISS UNPCKHPS UNPCKLPS XORPS
+syn keyword nasmSseInstruction  FXRSTOR FXSAVE LDMXCSR
+syn keyword nasmSseInstruction  MOVHLPS
+syn keyword nasmSseInstruction  MOVLHPS MOVNTPS MOVSS
+syn keyword nasmSseInstruction  RCPPS RCPSS RSQRTPS RSQRTSS
+syn keyword nasmSseInstruction  SHUFPS STMXCSR
+syn keyword nasmSseInstruction  UNPCKHPS UNPCKLPS
+" SSE3
+syn keyword nasmSseInstruction  FISTTP LDDQU ADDSUBPS ADDSUBPD
+syn match   nasmSseInstruction  "\<\%(ADDSUB\|HADD\|HSUB\)P[DS]\>"
+syn keyword nasmSseInstruction  MOVSHDUP MOVSLDUP MOVDDUP MONITOR MWAIT
+syn keyword nasmSseInstruction  PMADDUBSW PMULHRSW PSHUFB PALIGNR
+syn match   nasmSseInstruction  "\<PH\%(ADD\|SUB\)\%(S\?W\|D\)\>"
+syn match   nasmSseInstruction  "\<P\%(ABS\|SIGN\)[BWD]\>"
+" SSE4
+syn keyword nasmSseInstruction  PMULLD PMULDQ DPPD PDDS MOVNTDQA
+syn match   nasmSseInstruction  "\<BLENDV\?P[SD]\>"
+syn keyword nasmSseInstruction  PBLENDVB PBLENDW
+syn match   nasmSseInstruction  "\<PM\%(IN\|AX\)\%(U[WD]\|S[BD]\)\>"
+syn keyword nasmSseInstruction  EXTRACTPS INSERTPS PEXTRW
+syn match   nasmSseInstruction  "\<P\%(INS\|EXT\)R[BDQ]\>"
+syn match   nasmSseInstruction  "\<PMOV[ZS]X\%(B[WDQ]\|W[DQ]\|DQ\)\>"
+syn keyword nasmSseInstruction  MPSADBW PHMINPOSUW PTEST PACKUSDW PCMPEQQ PCMPGTQ
+syn match   nasmSseInstruction  "\<PCMP[IE]STR[IM]\>"
+
+syn match   nasmSseInstruction  "\<AES\%(DEC\|ENC\)\%(LAST\)\?\>"
+syn keyword nasmSseInstruction  AESIMC AESKEYGENASSIST PCLMULQDQ
 
 
 " Three Dimensional Now Packed Instructions: (requires 3DNow! unit)
@@ -410,6 +447,64 @@ syn keyword nasmNowInstruction  FEMMS PAVGUSB PF2ID PFACC PFADD PFCMPEQ PFCMPGE
 syn keyword nasmNowInstruction  PFCMPGT PFMAX PFMIN PFMUL PFRCP PFRCPIT1
 syn keyword nasmNowInstruction  PFRCPIT2 PFRSQIT1 PFRSQRT PFSUB[R] PI2FD
 syn keyword nasmNowInstruction  PMULHRWA PREFETCH[W]
+
+" Bit Manipulation Instructions: (requires bmi)
+syn keyword nasmBmiInstruction  ANDN BEXTR BLSI BLSMSK BLSR BZHI
+syn keyword nasmBmiInstruction  LZCNT MULX PDEP PEXT RORX SARX SHLX SHRX TZCNT
+
+" Advanced Vector Extension Instructions: (requires AVX)
+" promoted floating point
+syn match   nasmAvxInstruction  "\<VMOV\%(\%(\%([AUHL]\|NT\|MSK\)P\|S\)[SD]\|\%(S[HL]\|D\)DUP\|\%(LH\|HL\)PS\|NTDQA\?\|DQ[AU]\|[DQ]\)\>"
+syn keyword nasmAvxInstruction  LDDQU EXTRACTPS INSERTPS
+syn match   nasmAvxInstruction  "\<V\%(ADD\|SUB\|MUL\|DIV\|MIN\|MAX\|CMP\|ROUND\)[PS][SD]\>"
+syn match   nasmAvxInstruction  "\<V\%(ANDN\?\|X\?OR\|SHUF\|ADDSUB\|HADD\|HSUB\|BLENDV\?\|DP\)P[SD]\>"
+syn match   nasmAvxInstruction  "\<V\%(RSQRT\|RCP\)[PS]S\>"
+syn match   nasmAvxInstruction  "\<VUNPCK[LH]P[SD]\>"
+
+" promoted integer
+syn match   nasmAvxInstruction  "\<VPUNPCK[LH]\%(BW\|WD\|DQ\|QDQ\)\>"
+syn match   nasmAvxInstruction  "\<VPACK[US]\%(WB\|DW\)\>"
+syn match   nasmAvxInstruction  "\<VPCMP\%(\%(EQ\|GT\)[BWDQ]\|[IE]STR[IM]\)\>"
+syn match   nasmAvxInstruction  "\<VPSHUF\%([DB]\|[HL]W\)\>"
+syn match   nasmAvxInstruction  "\<VP\%(INSR\|EXTR\|ADD\|SUB\)[BWDQ]\>"
+syn match   nasmAvxInstruction  "\<VP\%(ABS\|SIGN\|M\%(IN\|AX\)[US]\)[BWD]\>"
+syn match   nasmAvxInstruction  "\<VP\%(ADD\|SUB\)U\?S[BW]\>"
+syn match   nasmAvxInstruction  "\<VPH\%(ADD\|SUB\)\%(D\|S\?W\)\>"
+syn match   nasmAvxInstruction  "\<VPMUL\%(L[WD]\|HU\?W\|U\?DQ\|HRSW\)\>"
+syn keyword nasmAvxInstruction  VPAND[N] VPOR VPXOR VPMOVMSKB VPTEST
+syn keyword nasmAvxInstruction  VPMADDWD VPSADBW VPMSADBW VMASKMOVDQU VPMADDUBSW VPALIGNR
+syn keyword nasmAvxInstruction  VPHMINPOSUW VPBLENDVB VPBLENDW
+syn match   nasmAvxInstruction  "\<VPS[RL]L[WDQ]\>"
+syn keyword nasmAvxInstruction  VPSRAW VPSRAD
+syn match   nasmAvxInstruction  "\<VPMOV[ZS]X\%(B[WDQ]\|W[DQ]\|DQ\)\>"
+
+"promoted other
+syn keyword nasmAvxInstruction  VLDMXCSR VSTMXCSR
+syn match   nasmAvxInstruction  "\<VU\?COMIS[SD]\>"
+syn match   nasmAvxInstruction  "\<VCVT\([PS]\)\%(S2\1D\|D2\1S\|I2\1[SD]\)\>"
+syn match   nasmAvxInstruction  "\<VCVTT\?\([PS]\)[SD]2\1I\>"
+syn match   nasmAvxInstruction  "\<VCVT\%(T\?P[SD]2DQ\|DQ2P[SD]\)\>"
+
+"new + avx2
+syn match   nasmAvxInstruction  "\<V\%(MASKMOV\|PERMIL\|TEST\)P[PS]\>"
+syn keyword nasmAvxInstruction  VCVTPH2PS VCVTPS2PH VTESTPD VTESTPS VPBLENDD
+syn match   nasmAvxInstruction  "\<VBROADCAST\%([IF]128\|S[SD]\)\>"
+syn match   nasmAvxInstruction  "\<V\%(INSERT\|EXTRACT\)[IF]128\>"
+syn keyword nasmAvxInstruction  VMASKMOVPS VMASKMOVPD VPMASKMOVD VPMASKMOVQ
+syn match   nasmAvxInstruction  "\<VFN\?M\%(ADD\|SUB\)\%(132\|213\|231\)[PS][SD]\>"
+syn match   nasmAvxInstruction  "\<VFM\%(ADDSUB\|SUBADD\)\%(132\|213\|231\)P[SD]\>"
+
+syn keyword nasmAvxInstruction  VPBLENDD
+syn match   nasmAvxInstruction  "\<VPERM\%(2[IF]128\|\%(IL\)\?P[SD]\|[DQ]\)\>"
+syn match   nasmAvxInstruction  "\<VPS\%([RL]LV\?[DQ]\|RAV\?D\)\>"
+syn match   nasmAvxInstruction  "\<VGATHER[DQ]\%([DQ]\|P[SD]\)\>"
+
+" Unknown category
+syn keyword nasmXXXInstruction  MOVBE
+syn keyword nasmXXXInstruction  RDRAND RDSEED
+syn keyword nasmXXXInstruction  PREFETCHW PREFETCHWT1 CLFLUSH CLFLUSHOPT
+syn keyword nasmXXXInstruction  XSAVE[C] XSAVEOPT XRSTOR XGETBV
+
 
 
 " Vendor Specific Instructions:
@@ -511,6 +606,8 @@ hi def link nasmMemRefError     Error
 hi def link nasmStdInstruction  Statement
 hi def link nasmSysInstruction  Statement
 hi def link nasmDbgInstruction  Debug
+hi def link nasmAvxInstruction  Statement
+hi def link nasmBmiInstruction  Statement
 hi def link nasmFpuInstruction  Statement
 hi def link nasmMmxInstruction  Statement
 hi def link nasmSseInstruction  Statement
@@ -519,6 +616,9 @@ hi def link nasmAmdInstruction  Special
 hi def link nasmCrxInstruction  Special
 hi def link nasmUndInstruction  Todo
 hi def link nasmInstructnError  Error
+
+" instructions that have only been added, not put in the correct category
+hi def link nasmXXXInstruction  Statement
 
 
 let b:current_syntax = "nasm"
